@@ -1,0 +1,56 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Testing and Type Checking caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.coverage.*
+
+# Secrets, Keys, and Sensitive Material
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p8
+*.pkcs8
+
+# Node / Frontend
+node_modules/
+dist/
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# StegaGuard: Datasets & Heavy Model Weights (Section 5.1 & Section 4)
+# Never commit datasets or weights over 50MB
+backend/data/*
+!backend/data/.gitkeep
+backend/models/*.pt
+backend/models/*.pth
+backend/models/*.joblib
+backend/models/*.bin
+!backend/models/.gitkeep
+!backend/models/model_card.json
+
+# Operating System and IDE files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
