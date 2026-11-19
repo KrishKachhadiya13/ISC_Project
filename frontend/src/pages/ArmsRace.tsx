@@ -116,13 +116,6 @@ export function ArmsRace() {
               every pixel.
             </span>
           </label>
-          {isAdaptive(method) && (
-            <Callout tone="warn" title="Treat this as an example, not a benchmark">
-              S-UNIWARD and HILL put their changes where the picture is busy and hard to model. The detectors
-              here learned from plain least-significant-bit hiding only, and how well they catch real
-              S-UNIWARD or HILL messages has not been measured.
-            </Callout>
-          )}
           <button type="button" className="btn-primary" disabled={!cover || !pixels || race.isPending} onClick={() => race.mutate()}>
             {race.isPending ? <Spinner label="Embedding and scanning…" /> : <><Swords className="h-4 w-4" /> Embed and scan</>}
           </button>
