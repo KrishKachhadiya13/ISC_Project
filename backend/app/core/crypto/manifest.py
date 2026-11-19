@@ -15,13 +15,14 @@ from typing import Any
 
 import numpy as np
 from cryptography.hazmat.primitives.asymmetric import ed25519
+from numpy.typing import NDArray
 
 from app.core.crypto import keys, signing
 
 MANIFEST_VERSION: int = 1
 
 
-def compute_pixel_sha256(array: np.ndarray) -> str:
+def compute_pixel_sha256(array: NDArray[np.uint8]) -> str:
     """Compute deterministic SHA-256 hash over pixel array data.
 
     Format: SHA-256(b"{H},{W},{C},uint8|" + array.tobytes())
@@ -77,14 +78,14 @@ def canonical_json_encode(data: dict[str, Any]) -> bytes:
 
 
 def create_manifest(
-    stego_array: np.ndarray,
+    stego_array: NDArray[np.uint8],
     stego_file_bytes: bytes,
     method: str,
     mode: str,
     payload_bytes: int,
     payload_bpp: float,
     private_key: ed25519.Ed25519PrivateKey,
-    cover_array: np.ndarray | None = None,
+    cover_array: NDArray[np.uint8] | None = None,
     created_at: str | None = None,
 ) -> dict[str, Any]:
     """Create and digitally sign an integrity manifest.
@@ -144,7 +145,7 @@ def create_manifest(
 
 def verify_manifest(
     manifest: dict[str, Any],
-    stego_array: np.ndarray,
+    stego_array: NDArray[np.uint8],
     public_key: ed25519.Ed25519PublicKey,
     stego_file_bytes: bytes | None = None,
 ) -> tuple[bool, dict[str, Any]]:
