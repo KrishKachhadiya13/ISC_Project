@@ -553,6 +553,9 @@ def test_adaptive_stc_api_round_trip(method: str, api: TestClient, keypair: dict
     assert recovered["verified"] is True
     assert recovered["plaintext"] == SECRET_TEXT
     assert recovered["technique"] == "stc"
+    extract_stage = next(stage for stage in recovered["stages"] if stage["name"] == "extract_bits")
+    assert "adaptive STC" in extract_stage["detail"]
+    assert "0-bit" not in extract_stage["detail"]
 
 
 def test_2lsb_fits_a_message_that_one_bit_lsb_cannot(
