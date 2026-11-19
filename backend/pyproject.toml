@@ -85,5 +85,6 @@ module = [
     "torchvision.*",
     "PIL.*",
     "hypothesis.*",
+    "pystc.*",
 ]
 ignore_missing_imports = true

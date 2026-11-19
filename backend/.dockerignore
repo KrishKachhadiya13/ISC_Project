@@ -1,0 +1,14 @@
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+data
+tests
+scripts
+notebooks
+models/*.tmp.pt
+*.pem
+.env

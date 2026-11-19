@@ -7,11 +7,18 @@ pillow>=10.4.0
 numpy>=1.26.0
 scipy>=1.13.0
 scikit-image>=0.24.0
-scikit-learn>=1.5.0
+# Exact pin: the committed classical_hgb.joblib was pickled with 1.6.1, and
+# scikit-learn models only load reliably with the version that saved them.
+scikit-learn==1.6.1
 joblib>=1.4.0
 cryptography>=43.0.0
 argon2-cffi>=23.1.0
-slowapi>=0.1.9
+# Full repository is pinned because the PyPI source archive omits required C++ headers.
+# Windows source installs need Microsoft C++ Build Tools; Docker builds it in the builder stage.
+pystcstego @ git+https://github.com/daniellerch/pySTC.git@9bad216cd74f08d6b5f2655307abb191613d4bcb
+# CNN inference in the API. Install the CPU wheel for the app image
+# (--index-url https://download.pytorch.org/whl/cpu); training uses CUDA.
+torch>=2.4.0
 matplotlib>=3.9.0
 pandas>=2.2.0
 tqdm>=4.66.0
