@@ -1,0 +1,118 @@
+{
+  "dataset_origin": "BOSSbase 1.01 from Kaggle (lunan0/bossbase-1-01)",
+  "dataset_split_sha256": "8c044cbd2577aef89019ca8e1a87d724c8d99e8681df2a8ffe0d17536d8f44d5",
+  "format_version": 1,
+  "git_commit_hash": "be34d2113cae2d88158247262c18f033334bce7f",
+  "hyperparameters": {
+    "architecture": "StegNet-Lite",
+    "batch_pairs": 32,
+    "best_epoch": 27,
+    "curriculum": {
+      "epochs_1_to_8_bpp": [
+        0.4,
+        0.8
+      ],
+      "later_epochs_bpp": [
+        0.05,
+        0.1,
+        0.2,
+        0.4,
+        0.8
+      ]
+    },
+    "device": "cuda",
+    "early_stopping_patience": 8,
+    "epochs_completed": 35,
+    "epochs_requested": 40,
+    "gradient_clip": 1.0,
+    "learning_rate": 0.0003,
+    "methods_tested": [
+      "lsb_replace",
+      "lsb_match"
+    ],
+    "modes_tested": [
+      "keyed",
+      "sequential"
+    ],
+    "payloads_tested": [
+      0.05,
+      0.1,
+      0.2,
+      0.4,
+      1.0
+    ],
+    "seed": 1337,
+    "training_methods": [
+      "lsb_replace",
+      "lsb_match"
+    ],
+    "training_mode": "keyed",
+    "truncation": 3.0,
+    "weight_decay": 0.0001
+  },
+  "limitations": [
+    "Model was trained on grayscale keyed LSB steganography using lsb_replace, lsb_match only.",
+    "RGB inference scores channels independently and is not RGB-trained.",
+    "Heatmaps indicate model response and are not proof of hidden data."
+  ],
+  "model": "cnn_v1",
+  "seed": 1337,
+  "split_counts": {
+    "test": 1500,
+    "train": 7000,
+    "val": 1500
+  },
+  "temperature": 0.541427147242349,
+  "trainable_parameter_count": 111537,
+  "training_data_sha256": "cede0e76e6a75df1b6171602b7b96bf3810cacdf021f3ca2397ec1a481ad9983",
+  "training_time_seconds": 5466.2409855000005,
+  "validation_selection": {
+    "calibrated_metrics": {
+      "accuracy": 0.932,
+      "calibrated_mean_probability": 0.4915291111770695,
+      "confusion_matrix": [
+        [
+          5552,
+          448
+        ],
+        [
+          368,
+          5632
+        ]
+      ],
+      "f1": 0.9324503311258279,
+      "operating_threshold": -0.1246337890625,
+      "p_e": 0.068,
+      "precision": 0.9263157894736842,
+      "recall": 0.9386666666666666,
+      "roc_auc": 0.9866576111111112,
+      "sample_count": 12000,
+      "tpr_at_1_percent_fpr": 0.8151666666666667
+    },
+    "conditions": [
+      {
+        "method": "lsb_replace",
+        "mode": "keyed",
+        "payload_bpp": 0.1
+      },
+      {
+        "method": "lsb_replace",
+        "mode": "keyed",
+        "payload_bpp": 0.4
+      },
+      {
+        "method": "lsb_match",
+        "mode": "keyed",
+        "payload_bpp": 0.2
+      },
+      {
+        "method": "lsb_match",
+        "mode": "keyed",
+        "payload_bpp": 0.4
+      }
+    ],
+    "p_e": 0.068,
+    "roc_auc": 0.9866576111111112,
+    "threshold": -0.1246337890625
+  }
+}
