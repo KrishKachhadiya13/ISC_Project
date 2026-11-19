@@ -1,0 +1,29 @@
+# Run the whole app:  docker compose up --build   ->  http://localhost:8080
+services:
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      # The browser only talks to nginx, so the API accepts that one origin.
+      CORS_ORIGINS: '["http://localhost:8080"]'
+    # Stateless server: nothing is written, so the filesystem can be read-only.
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=4).status == 200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 40s
+      retries: 3
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:80"

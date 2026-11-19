@@ -54,3 +54,6 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# Demo covers copied from BOSSbase (not redistributable)
+frontend/public/demo/bossbase_*.png
