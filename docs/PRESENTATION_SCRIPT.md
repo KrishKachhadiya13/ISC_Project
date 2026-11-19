@@ -108,8 +108,9 @@ stay quiet. If something breaks, Person 3 handles the recovery plan at the botto
 - **The three numbers: 5 hiding techniques, 3 detectors, 6 verification steps.** "Three detectors look at an
   image, and six checks stand between a hidden package and a decrypted message. The five techniques are three
   LSB variants that can carry a real message, plus S-UNIWARD and HILL, two advanced methods. We will say more
-  about those later." *(Before the talk, check the Hide page's method list so this sentence matches what is
-  installed on your laptop. See "Honest limits" in Part 6.)*
+  about those later." *(Before the talk, check the Hide page's method list. On the build machine all five work, because the
+  STC package is installed; on another laptop without it, S-UNIWARD and HILL show a clear "not installed"
+  message. See "Honest limits" in Part 6.)*
 - **The path of a message strip.** "Encrypt, sign, hide, verify, decrypt. Five steps. Notice the order on the
   receiving side: **verify before decrypt**. We will come back to why."
 
@@ -343,6 +344,14 @@ grayscale, seed 1337).** Choose two or three:
   **0.96** at 0.1 bpp matching, against about **0.78** for the feature classifier.
 - We tested on three techniques the detectors were **never trained on** (2-LSB, and simulations of S-UNIWARD and
   HILL) and report those rows separately. We do not claim the detectors are good at them.
+- **Live demo of exactly that:** on this page choose **S-UNIWARD (STC)** (or HILL), payload **0.4 bpp**, press
+  **Embed and scan**. Expected, and rehearsed: PSNR about 58 dB, about 9.6% of samples changed (plain LSB at
+  the same payload changes about 20%), and **"Not flagged"** in the With-message column; the neural network scores
+  about 0.00. Then switch to **LSB matching** at 0.4 bpp: it is flagged. Say it honestly: "A smarter hiding
+  method hides in the busy parts of the picture, and our detectors, which learned from plain LSB hiding,
+  do not catch it. On three test covers at 0.4 bpp, LSB matching was flagged 3 of 3 and S-UNIWARD and HILL
+  0 of 6. That is three images, an example and not a benchmark. It is the arms race in one slide, and it is
+  our main piece of future work." The page shows the same warning.
 
 *(AUC in one sentence: "1.0 is a perfect detector, 0.5 is a coin toss.")*
 
@@ -378,9 +387,12 @@ attacker does not just look, but changes the picture? Over to you."
 
 **ON SCREEN:** **Tamper test**. In presenter mode press **Load the image from the Hide step**; nothing else needs
 entering, and there is no mode to choose, because the receiver works out how the message was hidden from the
-image itself (this includes S-UNIWARD and HILL images when the optional STC package is installed). Pick an
+image itself (this includes S-UNIWARD and HILL images). Pick an
 attack. Start with **No attack (control)**, press **Apply attack and verify**. The result card at the top gives
-one plain headline, and the page scrolls to it.
+one plain headline, and the page scrolls to it. **A nice contrast if you have a minute:** hide a message with
+**S-UNIWARD (STC)** on the Hide page, then run **Flip 1 pixel LSB** here. With plain LSB the message survives (amber
+headline); with S-UNIWARD the **signature check fails every time** (we ran it 4 times), because every pixel
+takes part in decoding. Either way the change is caught.
 
 **SAY:**
 > This is the page where we try to break our own system **[INFO SECURITY]**. It takes the verified stego image,
@@ -427,8 +439,7 @@ Then the security rules, one short sentence each. Choose all of them if time all
 6. **The stego image is served as exact bytes.** If the browser redrew it on a canvas to download, the hidden
    bits would be silently rewritten.
 
-**Testing, with real numbers:** "The backend has **233 automated tests passing** (7 skipped because they need an
-optional compiled package), with **91% coverage of the crypto and hiding core**. The website has **49 tests**,
+**Testing, with real numbers:** "The backend has **240 automated tests passing**, none skipped (they include real S-UNIWARD and HILL round trips), with **91% coverage of the crypto and hiding core**. The website has **58 tests**,
 including automatic accessibility checks. There is also an **18-step smoke test** that exercises the real running
 server end to end, including a wrong password and an uploaded JPEG being refused." *(If the numbers change before
 the talk, rerun the tests and quote the new ones.)*
@@ -445,10 +456,11 @@ the talk, rerun the tests and quote the new ones.)*
 > - The detectors are statistical. They produce false alarms and misses, and a high score is a reason to look
 >   closer, **not proof**.
 > - Light hiding, with few changed pixels, can slip past the detectors. We showed that ourselves.
-> - The two advanced methods, S-UNIWARD and HILL, are real message-carrying options only when an optional
->   compiled package is installed. Our stored detector results for them come from a *simulation* of where those
->   schemes would change pixels, not from real messages, and we say so in the documentation. How well the
->   detectors do on genuine adaptive messages is a separate experiment we have **not** run.
+> - The two advanced methods, S-UNIWARD and HILL, carry real messages here, but they need an optional compiled
+>   package, which is installed on our machine but not required elsewhere. Our *stored* detector results for them
+>   come from a *simulation* of where those schemes would change pixels, not from real messages, and we say so
+>   in the documentation. We have only seen the detectors on real S-UNIWARD and HILL messages in a live demo on
+>   three covers, where they were not flagged; a proper measurement is a separate experiment we have **not** run.
 >
 > **Ethics.** Steganography is dual-use: it protects journalists and dissidents, and it can hide wrongdoing. We
 > wrote an acceptable-use statement, we use throw-away demo keys, we never touch anyone else's images, and
@@ -493,7 +505,7 @@ Open `docs/VIVA_QA.md` for the full list of 45. These are the likeliest, with a 
 | What stops abuse of the server? | Person 3 | Size and pixel limits, decoding to validate, rate limiting, no storage, uniform error messages. |
 | Why does the server store nothing? | Person 3 | Less to leak: no uploads, messages or keys ever touch disk or logs. |
 | How do you know the numbers are real? | Person 3 | Every metric is generated by a script into `metrics.json` and the model card; the website and docs never hard-code results. |
-| What about S-UNIWARD and HILL? | Person 2 | Cost maps are implemented; detector results for them come from a simulator that carries no message; real message-carrying use needs an optional compiled package and has not been evaluated against the detectors. |
+| What about S-UNIWARD and HILL? | Person 2 | Cost maps are implemented; stored detector results for them come from a simulator that carries no message; the real embedder works here (it needs an optional compiled package) and on 3 covers at 0.4 bpp the detectors did not flag it, but that is not a measured benchmark. |
 
 ---
 

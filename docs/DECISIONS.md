@@ -300,3 +300,25 @@ embedder (not the detection simulator). The random message is sized with 64 extr
 that their performance on real S-UNIWARD/HILL messages has not been measured, so the scan is an example, not a benchmark.
 Without the optional `pystcstego` package the scan stops with the `STC_UNAVAILABLE` message and the other methods are
 unaffected. Not exercised end to end on this machine because the package could not be compiled here.
+
+## 2026-11-19: STC installed and verified on the build machine; branch repair
+- **STC now builds and runs here.** The earlier failure was a 32-bit MinGW (`C:\MinGW`) against a 64-bit Python, which can never
+  work. Microsoft C++ Build Tools 2022 were installed with winget and the pinned `pystcstego` revision built into
+  `backend/.venv`. All 240 backend tests now pass with none skipped, including the S-UNIWARD/HILL round trips through the
+  library and the API. This supersedes the "not exercised end to end on this machine" notes in the two entries above.
+- **Live checks:** real S-UNIWARD and HILL messages hide, auto-extract and verify, and appear on Compare detectors. At
+  0.4 bpp on the three demo covers the detectors flagged LSB matching 3/3 and S-UNIWARD/HILL 0/6 (ensemble 0.17 to 0.59
+  against a 0.693 line). This is an anecdote on three images, not a benchmark, and is not written to `metrics.json`.
+- **Tamper behaviour differs by method:** flipping one pixel leaves a plain-LSB message readable, but on an STC image it
+  broke the signature in 4 of 4 runs, because every pixel takes part in decoding. The Tamper page text says so.
+- **Wording bug fixed:** the extract stage said "0-bit LSB" for STC; it now says "adaptive STC" (pinned by a test).
+- **Branch state found and repaired.** While the installer ran, the worktree was switched to `publish-yashwanth` (6 commits
+  from base `9f182fa`, pushed to origin). That branch lacked 71 files tracked on `main` (core modules such as
+  `image_io.py`, `lsb_match.py`, the detector modules, the classical model weights) and carried an older
+  `crypto/packet.py` without `ParsedPacket`, so the backend could not import. 64 of the 71 were restored (staged, not
+  committed) from `main`; the other 7 (`AGENTS.md`, `PROJECT_BLUEPRINT.md`, `.github/copilot-instructions.md`, `Makefile`,
+  `frontend/src/index.css`, two zip files) were deleted in the laptop worktree before the publish and were left out on
+  purpose; `packet.py` was restored from the laptop stash. Not yet committed or pushed, so the published branch is still
+  incomplete until that is done. The publish `.gitignore` also now ignores `*.joblib`, so the classical model weights are
+  present locally but excluded from git; decide whether that is intended.
+

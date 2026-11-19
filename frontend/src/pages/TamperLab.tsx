@@ -21,7 +21,7 @@ type Attack = 'none' | 'flip_one' | 'flip_many' | 'noise' | 'crop' | 'resize' | 
 
 const ATTACKS: { value: Attack; label: string; lossless: boolean; explain: string }[] = [
   { value: 'none', label: 'No attack (control)', lossless: true, explain: 'The image is sent unchanged, so every check should pass. This shows the test itself is fair.' },
-  { value: 'flip_one', label: 'Flip 1 pixel LSB', lossless: true, explain: 'Changes one pixel value by one. The pixel check fails, but the message usually still reads, because that pixel probably carried no message bit.' },
+  { value: 'flip_one', label: 'Flip 1 pixel LSB', lossless: true, explain: 'Changes one pixel value by one. With plain LSB hiding the pixel check fails but the message usually still reads, because that pixel probably carried no message bit. With S-UNIWARD or HILL every pixel takes part in decoding, so the signature check fails too.' },
   { value: 'flip_many', label: 'Flip N random LSBs', lossless: true, explain: 'Random errors hit the bits that carry the message. The built-in checksum or the sender\u2019s signature catches them.' },
   { value: 'noise', label: 'Add ±1 noise', lossless: true, explain: 'Every pixel is nudged by one level up, down or not at all. Invisible to the eye, but it scrambles the layer where the message lives.' },
   { value: 'crop', label: 'Crop 8 px border', lossless: true, explain: 'The picture gets smaller, so every pixel position shifts and the receiver can no longer find where the message was placed.' },
