@@ -75,6 +75,30 @@ class PacketPayload:
         return self.data.decode("utf-8", errors="replace")
 
 
+@dataclass(frozen=True)
+class ParsedPacket:
+    """Structurally validated packet fields prior to sender authentication."""
+
+    packet_bytes: bytes
+    flags: int
+    kdf_id: int
+    sender_fingerprint: bytes
+    salt: bytes
+    nonce: bytes
+    ciphertext: bytes
+    signature: bytes
+
+    @property
+    def signed_data(self) -> bytes:
+        """Return the exact packet bytes covered by the Ed25519 signature."""
+        return self.packet_bytes[:-SIGNATURE_SIZE]
+
+    @property
+    def associated_data(self) -> bytes:
+        """Return packet header bytes authenticated as AES-GCM associated data."""
+        return self.packet_bytes[:AAD_SIZE]
+
+
 def format_inner_plaintext(
     data: bytes, is_file: bool = False, filename: str | None = None
 ) -> bytes:
@@ -216,6 +240,19 @@ def parse_and_verify_packet(
         VerificationFailedError: If signature verification fails (stops before decrypt!).
         DecryptionFailedError: If AES-GCM tag verification fails.
     """
+    parsed = parse_packet(packet_bytes)
+    check_sender_fingerprint(parsed, public_key)
+    verify_packet_signature(parsed, public_key)
+    return decrypt_verified_packet(parsed, password)
+
+
+def parse_packet(packet_bytes: bytes) -> ParsedPacket:
+    """Validate packet structure and expose fields for staged receiver flows.
+
+    This function performs no key derivation, signature verification, or
+    decryption. Callers must run ``check_sender_fingerprint`` and
+    ``verify_packet_signature`` before ``decrypt_verified_packet``.
+    """
     if len(packet_bytes) < MIN_PACKET_SIZE:
         raise InvalidPacketError(
             f"Packet too short: {len(packet_bytes)} bytes (minimum {MIN_PACKET_SIZE} bytes)."
@@ -229,13 +266,6 @@ def parse_and_verify_packet(
     if version != VERSION:
         raise InvalidPacketError(f"Unsupported packet version: {version:#04x}.")
 
-    # 1. Compare sender fingerprint in constant time
-    packet_sender_fp = packet_bytes[8:16]
-    expected_sender_fp = keys.fingerprint_short(public_key)
-    if not hmac.compare_digest(packet_sender_fp, expected_sender_fp):
-        raise KeyMismatchError("Packet sender fingerprint does not match the provided public key.")
-
-    # 2. Check ciphertext length
     ct_len = struct.unpack(">I", packet_bytes[44:48])[0]
     expected_total_len = HEADER_SIZE + ct_len + SIGNATURE_SIZE
     if len(packet_bytes) != expected_total_len:
@@ -243,26 +273,48 @@ def parse_and_verify_packet(
             f"Packet length mismatch: declared {expected_total_len} bytes, got {len(packet_bytes)}."
         )
 
-    signed_data = packet_bytes[:-SIGNATURE_SIZE]
-    signature = packet_bytes[-SIGNATURE_SIZE:]
+    ciphertext_end = HEADER_SIZE + ct_len
+    return ParsedPacket(
+        packet_bytes=packet_bytes,
+        flags=flags,
+        kdf_id=kdf_id,
+        sender_fingerprint=packet_bytes[8:16],
+        salt=packet_bytes[16:32],
+        nonce=packet_bytes[32:44],
+        ciphertext=packet_bytes[HEADER_SIZE:ciphertext_end],
+        signature=packet_bytes[ciphertext_end:],
+    )
 
-    # 3. VERIFY BEFORE DECRYPT (Strict Requirement)
-    # The signature covers the entire packet before the signature itself.
-    # If this fails, STOP immediately. Never touch KDF or decryption!
-    signing.verify_or_raise(public_key, signature, signed_data)
 
-    # 4. Derive symmetric key
-    salt = packet_bytes[16:32]
-    nonce = packet_bytes[32:44]
-    key = kdf.derive_key(password, salt, kdf_id=kdf_id, length=aead.KEY_SIZE_BYTES)
+def check_sender_fingerprint(
+    parsed: ParsedPacket,
+    public_key: ed25519.Ed25519PublicKey,
+) -> None:
+    """Constant-time compare the packet's sender fingerprint with the public key."""
+    expected = keys.fingerprint_short(public_key)
+    if not hmac.compare_digest(parsed.sender_fingerprint, expected):
+        raise KeyMismatchError("Packet sender fingerprint does not match the provided public key.")
 
-    # 5. Decrypt ciphertext with AES-256-GCM
-    aad = packet_bytes[:AAD_SIZE]
-    ciphertext = packet_bytes[HEADER_SIZE : HEADER_SIZE + ct_len]
-    inner_plaintext = aead.decrypt(key, nonce, ciphertext, associated_data=aad)
 
-    # 6. Decompress if compressed flag set
-    if flags & FLAG_COMPRESSED:
+def verify_packet_signature(
+    parsed: ParsedPacket,
+    public_key: ed25519.Ed25519PublicKey,
+) -> None:
+    """Verify the packet's Ed25519 signature without deriving or using an AES key."""
+    signing.verify_or_raise(public_key, parsed.signature, parsed.signed_data)
+
+
+def decrypt_verified_packet(parsed: ParsedPacket, password: str) -> PacketPayload:
+    """Derive the AEAD key and decrypt a packet whose signature was verified."""
+    key = kdf.derive_key(password, parsed.salt, kdf_id=parsed.kdf_id, length=aead.KEY_SIZE_BYTES)
+    inner_plaintext = aead.decrypt(
+        key,
+        parsed.nonce,
+        parsed.ciphertext,
+        associated_data=parsed.associated_data,
+    )
+
+    if parsed.flags & FLAG_COMPRESSED:
         try:
             inner_plaintext = zlib.decompress(inner_plaintext)
         except Exception as exc:

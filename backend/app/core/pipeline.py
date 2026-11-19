@@ -199,10 +199,10 @@ def receiver_pipeline(
                 bits_per_sample=bits_per_sample,
             )
             detected = bits_per_sample
+        # 0 is the internal code for the STC decoder; users should see a name, not the code.
+        technique = "adaptive STC" if detected == 0 else f"{detected}-bit LSB"
         stages.append(
-            PipelineStage(
-                "extract_bits", "passed", f"Embedded packet extracted ({detected}-bit LSB)."
-            )
+            PipelineStage("extract_bits", "passed", f"Embedded packet extracted ({technique}).")
         )
     except (StegoError, ValueError) as exc:
         return _failed_result(stages, "extract_bits", exc)
