@@ -1,0 +1,148 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens as RGB triplets so Tailwind opacity modifiers work.
+   Dark is the default: deep navy, one periwinkle accent and a warm amber highlight.
+   Every text/background pair meets WCAG AA (checked numerically; see docs/DECISIONS.md). */
+:root,
+[data-theme='dark'] {
+  --bg: 8 12 20;
+  --panel: 15 21 33;
+  --raised: 23 31 47;
+  --line: 40 51 72;
+  --fg: 236 240 247;
+  --muted: 150 165 187;
+  --accent: 129 154 255; /* periwinkle blue */
+  --violet: 245 184 75; /* warm amber highlight (name kept for presenter-mode notices) */
+  --ok: 84 208 150;
+  --bad: 246 120 120;
+  --warn: 245 184 75;
+  --on-accent: 9 13 30;
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
+  --bg: 245 246 250;
+  --panel: 255 255 255;
+  --raised: 239 241 247;
+  --line: 214 219 231;
+  --fg: 21 26 40;
+  --muted: 84 95 117;
+  --accent: 52 80 214;
+  --violet: 150 93 0;
+  --ok: 24 112 70;
+  --bad: 175 38 38;
+  --warn: 135 82 0;
+  --on-accent: 255 255 255;
+  color-scheme: light;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply font-sans text-fg antialiased;
+    min-height: 100vh;
+    line-height: 1.6;
+    background-color: rgb(var(--bg));
+    /* Two soft glows at the top of the page: depth without any neon. */
+    background-image:
+      radial-gradient(52rem 30rem at 8% -6%, rgb(var(--accent) / 0.16), transparent 62%),
+      radial-gradient(40rem 26rem at 100% 0%, rgb(var(--violet) / 0.07), transparent 60%);
+    background-repeat: no-repeat;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: rgb(var(--accent) / 0.3);
+  }
+  code {
+    @apply font-mono text-[0.9em];
+  }
+}
+
+@layer components {
+  /* Glass panels: translucent fill, hairline border, soft depth. */
+  .card {
+    @apply rounded-xl border border-line/80 bg-panel/80 p-5 backdrop-blur-sm sm:p-6;
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.04) inset,
+      0 18px 40px -24px rgb(0 0 0 / 0.55);
+  }
+  [data-theme='light'] .card {
+    box-shadow: 0 1px 2px rgb(20 30 60 / 0.06), 0 14px 32px -22px rgb(20 30 60 / 0.25);
+  }
+  .card-hover {
+    @apply transition duration-200 hover:-translate-y-0.5 hover:border-accent/50;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition duration-150 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-accent text-on-accent hover:brightness-110 active:translate-y-px;
+    box-shadow: 0 8px 22px -10px rgb(var(--accent) / 0.8);
+  }
+  .btn-secondary {
+    @apply btn border border-line bg-raised/60 text-fg hover:border-accent/60 hover:bg-raised;
+  }
+  .btn-ghost {
+    @apply btn text-muted hover:text-fg;
+  }
+  .field-label {
+    @apply mb-1.5 block text-sm font-semibold text-fg;
+  }
+  .field {
+    @apply w-full rounded-lg border border-line bg-bg/60 px-3 py-2.5 text-sm text-fg placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25;
+  }
+  .hint {
+    @apply mt-1 text-xs text-muted;
+  }
+  .mono {
+    @apply font-mono tabular-nums;
+  }
+  .page-title {
+    @apply font-display text-3xl font-bold tracking-tight sm:text-4xl;
+  }
+  .section-title {
+    @apply font-display text-xl font-bold tracking-tight;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-muted;
+  }
+  /* Small rounded label with a coloured dot. */
+  .chip {
+    @apply inline-flex items-center gap-2 rounded-full border border-line bg-raised/60 px-3 py-1 text-xs font-medium text-muted;
+  }
+  /* Faint blueprint grid, fading out from one corner. */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgb(var(--fg) / 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--fg) / 0.045) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 80% at 25% 15%, black, transparent 75%);
+    mask-image: radial-gradient(ellipse 70% 80% at 25% 15%, black, transparent 75%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

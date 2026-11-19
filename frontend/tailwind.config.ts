@@ -1,36 +1,37 @@
 import type { Config } from 'tailwindcss';
 
+// Colors are CSS variables (see src/styles/index.css) so the dark and light themes
+// share one set of class names.
+const token = (name: string): string => `rgb(var(--${name}) / <alpha-value>)`;
+
 const config: Config = {
-  content: [
-    './index.html',
-    './src/**/*.{js,ts,jsx,tsx}',
-  ],
-  darkMode: 'class',
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        console: {
-          bg: '#0B0F14',
-          panel: '#111827',
-          border: '#1F2937',
-          text: '#E5E7EB',
-          muted: '#9CA3AF',
-        },
-        cyan: {
-          accent: '#22D3EE',
-        },
-        violet: {
-          accent: '#A78BFA',
-        },
-        status: {
-          success: '#34D399',
-          danger: '#F87171',
-          warning: '#FBBF24',
-        },
+        bg: token('bg'),
+        panel: token('panel'),
+        raised: token('raised'),
+        line: token('line'),
+        fg: token('fg'),
+        muted: token('muted'),
+        accent: token('accent'),
+        violet: token('violet'),
+        ok: token('ok'),
+        bad: token('bad'),
+        warn: token('warn'),
+        'on-accent': token('on-accent'),
+      },
+      borderRadius: {
+        md: '6px',
+        lg: '10px',
+        xl: '14px',
+        '2xl': '20px',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+        display: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
     },
   },
